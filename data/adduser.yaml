@@ -1,0 +1,12 @@
+- baseInfo:
+    api_name: 登录获取 Token
+    url: https://dummyjson.com/auth/login
+    method: post
+    header:
+      Content-Type: application/json; charset=utf-8
+  testCase:
+    - case_name: 用户登录
+      data:
+        username: ${get_extract_data(usernames, 0)}
+        password: ${get_extract_data(username)}
+        expiresInMins: 60

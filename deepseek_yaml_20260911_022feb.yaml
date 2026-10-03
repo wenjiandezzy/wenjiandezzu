@@ -1,0 +1,530 @@
+openapi: 3.0.3
+info:
+  title: DummyJSON API (精简版)
+  description: 用于学习接口自动化，包含认证、商品、用户、购物车核心接口。
+  version: 1.0.0
+servers:
+  - url: https://dummyjson.com
+    description: 生产环境
+
+paths:
+  /auth/login:
+    post:
+      summary: 登录获取 Token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  example: emilys
+                password:
+                  type: string
+                  example: emilyspass
+                expiresInMins:
+                  type: integer
+                  example: 30
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  id:
+                    type: integer
+                  username:
+                    type: string
+                  email:
+                    type: string
+
+  /auth/me:
+    get:
+      summary: 获取当前登录用户
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /auth/refresh:
+    post:
+      summary: 刷新 Token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                expiresInMins:
+                  type: integer
+                  example: 30
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+
+  /products:
+    get:
+      summary: 获取所有商品
+      tags: [Products]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: skip
+          in: query
+          schema:
+            type: integer
+        - name: select
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  total:
+                    type: integer
+                  skip:
+                    type: integer
+                  limit:
+                    type: integer
+
+  /products/{id}:
+    get:
+      summary: 获取单个商品
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+
+  /products/search:
+    get:
+      summary: 搜索商品
+      tags: [Products]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+  /products/add:
+    post:
+      summary: 新增商品（模拟）
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: integer
+                category:
+                  type: string
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+
+  /users:
+    get:
+      summary: 获取所有用户
+      tags: [Users]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: skip
+          in: query
+          schema:
+            type: integer
+        - name: select
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+
+  /users/{id}:
+    get:
+      summary: 获取单个用户
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/search:
+    get:
+      summary: 搜索用户
+      tags: [Users]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+  /user/me:
+    get:
+      summary: 获取当前认证用户
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /carts:
+    get:
+      summary: 获取所有购物车
+      tags: [Carts]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: skip
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  carts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cart'
+                  total:
+                    type: integer
+
+  /carts/{id}:
+    get:
+      summary: 获取单个购物车
+      tags: [Carts]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+
+  /carts/user/{userId}:
+    get:
+      summary: 获取用户的购物车
+      tags: [Carts]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  carts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cart'
+
+  /carts/add:
+    post:
+      summary: 新增购物车（模拟）
+      tags: [Carts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      quantity:
+                        type: integer
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        price: { type: number }
+        discountPercentage: { type: number }
+        rating: { type: number }
+        stock: { type: integer }
+        tags:
+          type: array
+          items: { type: string }
+        brand: { type: string }
+        sku: { type: string }
+        weight: { type: integer }
+        dimensions:
+          type: object
+          properties:
+            width: { type: number }
+            height: { type: number }
+            depth: { type: number }
+        warrantyInformation: { type: string }
+        shippingInformation: { type: string }
+        availabilityStatus: { type: string }
+        reviews:
+          type: array
+          items:
+            type: object
+            properties:
+              rating: { type: integer }
+              comment: { type: string }
+              date: { type: string }
+              reviewerName: { type: string }
+              reviewerEmail: { type: string }
+        returnPolicy: { type: string }
+        minimumOrderQuantity: { type: integer }
+        meta:
+          type: object
+          properties:
+            createdAt: { type: string }
+            updatedAt: { type: string }
+            barcode: { type: string }
+            qrCode: { type: string }
+        thumbnail: { type: string }
+        images:
+          type: array
+          items: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        lastName: { type: string }
+        maidenName: { type: string }
+        age: { type: integer }
+        gender: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        username: { type: string }
+        password: { type: string }
+        birthDate: { type: string }
+        image: { type: string }
+        bloodGroup: { type: string }
+        height: { type: number }
+        weight: { type: number }
+        eyeColor: { type: string }
+        hair:
+          type: object
+          properties:
+            color: { type: string }
+            type: { type: string }
+        ip: { type: string }
+        address:
+          type: object
+          properties:
+            address: { type: string }
+            city: { type: string }
+            state: { type: string }
+            stateCode: { type: string }
+            postalCode: { type: string }
+            coordinates:
+              type: object
+              properties:
+                lat: { type: number }
+                lng: { type: number }
+            country: { type: string }
+        macAddress: { type: string }
+        university: { type: string }
+        bank:
+          type: object
+          properties:
+            cardExpire: { type: string }
+            cardNumber: { type: string }
+            cardType: { type: string }
+            currency: { type: string }
+            iban: { type: string }
+        company:
+          type: object
+          properties:
+            department: { type: string }
+            name: { type: string }
+            title: { type: string }
+            address: { type: object }
+        ein: { type: string }
+        ssn: { type: string }
+        userAgent: { type: string }
+        crypto:
+          type: object
+          properties:
+            coin: { type: string }
+            wallet: { type: string }
+            network: { type: string }
+        role: { type: string }
+
+    Cart:
+      type: object
+      properties:
+        id: { type: integer }
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              title: { type: string }
+              price: { type: number }
+              quantity: { type: integer }
+              total: { type: number }
+              discountPercentage: { type: number }
+              discountedTotal: { type: number }
+              thumbnail: { type: string }
+        total: { type: number }
+        discountedTotal: { type: number }
+        userId: { type: integer }
+        totalProducts: { type: integer }
+        totalQuantity: { type: integer }

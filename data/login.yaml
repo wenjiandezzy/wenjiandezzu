@@ -1,0 +1,18 @@
+- baseInfo:
+    api_name: 登录获取 Token
+    url: https://dummyjson.com/auth/login
+    method: post
+    header: ${get_header(json)}
+    cookies:
+      ${get_extract_data(Cookie)}
+  testCase:
+    - case_name: 用户登录
+      json:
+        username: emilys
+        password: emilyspass
+        expiresInMins: 60
+      validation:
+        - contain: {'msg':'${get_extract_data(login_status)}'}
+        - eq: {'msg':'登陆成功'}
+      extract:
+        token: $.token
